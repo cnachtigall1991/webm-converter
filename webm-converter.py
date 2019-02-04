@@ -76,7 +76,7 @@ def options():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent('''\
                 Encode (mkv|mp4|avi|mov|flv|MOV) files in the current folder to webm (vp9 + opus) using ffmpeg.
-                All encoded files will be moved to a folder called "webm".
+                All encoded files will be moved to a folder like the encoding-option.
             '''),
         epilog=textwrap.dedent('''\
                 Version:    ''' + version + '''
