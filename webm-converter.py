@@ -7,6 +7,7 @@ import os
 import re
 import shutil
 
+version = '0.2-stable'
 files = []
 path = os.getcwd() + '/webm'
 
@@ -71,13 +72,13 @@ def options():
                 All encoded files will be moved to a folder called "webm".
             '''),
         epilog=textwrap.dedent('''\
-                Version:    0.1-stable
+                Version:    ''' + version + '''
                 Developer:  Christian Nachtigall
                 Bugreports: https://github.com/cnachtigall1991/webm-converter/issues
                 Github:     https://github.com/cnachtigall1991/webm-converter
             '''),
         allow_abbrev=False)
-    parser.add_argument('--version', action='version', version='%(prog)s 0.1-stable')
+    parser.add_argument('--version', action='version', version='%(prog)s ' + version)
     group = parser.add_argument_group('encoding')
     group.add_argument('-o', '--original', action='store_true', dest='original', help='keeps scale, aspect ratio and framerate | encoding on average bitrate 3000k')
     group.add_argument('--240p', action='store_true', dest='enc240p', help='320x240 (24/25/30 fps)')
