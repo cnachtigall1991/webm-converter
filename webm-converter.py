@@ -11,39 +11,44 @@ path = os.getcwd() + '/webm'
 
 
 def usage():
-    print('''
-webm-converter -h / --help
-  Usage: ''' + os.path.basename(__file__) + ''' [OUTPUT_FORMAT]
-  Encode all (mkv|mp4|avi|mov|flv|MOV) files in the current folder to webm using ffmpeg with vp9 and opus.
-  All encoded files will be moved to a folder called 'webm'.
+    print(
+        '\n'
+        'webm-converter -h / --help\n'
+        '   Usage: ' + os.path.basename(__file__) + ' [OUTPUT_FORMAT]\n'
+        '   Encode (mkv|mp4|avi|mov|flv|MOV) files in the current folder to webm (vp9 + opus) using ffmpeg.\n'
+        '   All encoded files will be moved to a folder called "webm".\n'
+        '\n'
+        '   Output formats:\n'
+        '      --240p     320x240   (24/25/30 fps)\n'
+        '      --360p     640x360   (24/25/30 fps)\n'
+        '      --480p     640x480   (24/25/30 fps)\n'
+        '      --720p30   1280x720  (24/25/30 fps)\n'
+        '      --720p60   1280x720  (50/60    fps)\n'
+        '      --1080p30  1920x1080 (24/25/30 fps)\n'
+        '      --1080p60  1920x1080 (50/60    fps)\n'
+        '      --1440p30  2560x1440 (24/25/30 fps)\n'
+        '      --1440p60  2560x1440 (50/60    fps)\n'
+        '      --2160p30  3840x2160 (24/25/30 fps)\n'
+        '      --2160p60  3840x2160 (50/60    fps)\n'
+        '      -o / --original [keeps scale, aspect ratio and framerate | encoding on average bitrate 3000k]\n'
+        '\n'
+        '    Version:    0.1-stable\n'
+        '    Developer:  Christian Nachtigall\n'
+        '    Bugreports: https://github.com/cnachtigall1991/webm-converter/issues\n'
+        '    Github:     https://github.com/cnachtigall1991/webm-converter\n'
+    )
 
-  Output formats:
-    --240p     320x240   (24/25/30 fps)
-    --360p     640x360   (24/25/30 fps)
-    --480p     640x480   (24/25/30 fps)
-    --720p30   1280x720  (24/25/30 fps)
-    --720p60   1280x720  (50/60    fps)
-    --1080p30  1920x1080 (24/25/30 fps)
-    --1080p60  1920x1080 (50/60    fps)
-    --1440p30  2560x1440 (24/25/30 fps)
-    --1440p60  2560x1440 (50/60    fps)
-    --2160p30  3840x2160 (24/25/30 fps)
-    --2160p60  3840x2160 (50/60    fps)
-    -o / --original [keeps scale, aspect ratio and framerate | encoding on average bitrate 3000k]
 
-   Version: 0.1-stable
-   Developer: Christian Nachtigall
-   Bugreports: https://github.com/cnachtigall1991/webm-converter/issues
-   Github: https://github.com/cnachtigall1991/webm-converter
-    ''')
-
-
-def ffmpeg_orig(files):
+def scan():
     with os.scandir('.') as scan:
         for entry in scan:
             if not entry.name.startswith('.') and entry.is_file():
                 if entry.name.endswith(('.mkv', '.mp4', '.avi', '.mov', '.flv', '.MOV')):
                     files.append(entry.name)
+
+
+def ffmpeg_orig(files):
+    scan()
 
     for file in files:
         basename = re.sub('\.mkv|mp4|avi|mov|flv|MOV$', '', file)
@@ -64,11 +69,7 @@ def ffmpeg_orig(files):
 
 
 def ffmpeg(files, width, height, avg, min, max, tile1, tile2, threads, crf, speed):
-    with os.scandir('.') as scan:
-        for entry in scan:
-            if not entry.name.startswith('.') and entry.is_file():
-                if entry.name.endswith(('.mkv', '.mp4', '.avi', '.mov', '.flv', '.MOV')):
-                    files.append(entry.name)
+    scan()
 
     for file in files:
         basename = re.sub('\.mkv|mp4|avi|mov|flv|MOV$', '', file)
@@ -92,10 +93,7 @@ def ffmpeg(files, width, height, avg, min, max, tile1, tile2, threads, crf, spee
         shutil.move(basename + '.webm', path)
 
 
-def main():
-    if not os.path.exists(path):
-        os.mkdir(path)
-
+def options():
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'ho', ['help', 'original', '240p', '360p', '480p', '720p30',
                                                          '720p60', '1080p30', '1080p60', '1440p30', '1440p60',
@@ -136,6 +134,13 @@ def main():
         else:
             usage()
             sys.exit(2)
+
+
+def main():
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+    options()
 
 
 if __name__ == "__main__":
