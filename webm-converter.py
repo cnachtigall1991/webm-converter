@@ -33,8 +33,8 @@ webm-converter -h / --help
 
    Version: 0.1-stable
    Developer: Christian Nachtigall
-   Bugreports: n/a
-   Github: n/a
+   Bugreports: https://github.com/cnachtigall1991/webm-converter/issues
+   Github: https://github.com/cnachtigall1991/webm-converter
     ''')
 
 
