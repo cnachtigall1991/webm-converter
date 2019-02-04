@@ -9,7 +9,6 @@ import shutil
 
 version = '0.2-stable'
 files = []
-path = os.getcwd() + '/webm'
 
 
 def scan_folder():
@@ -20,8 +19,12 @@ def scan_folder():
                     files.append(entry.name)
 
 
-def ffmpeg_orig(files):
+def ffmpeg_orig(files, suffix):
     scan_folder()
+
+    path = os.getcwd() + '/' + suffix
+    if not os.path.exists(path):
+        os.mkdir(path)
 
     for file in files:
         basename = re.sub('\.mkv|mp4|avi|mov|flv|MOV$', '', file)
@@ -30,19 +33,23 @@ def ffmpeg_orig(files):
                     ' -g 240 -threads 8 -quality good -crf 30 -c:v libvpx-vp9 -c:a libopus -b:a 96k'
                     ' -ac 2 -af "pan=stereo|FL=FC+0.30*FL+0.30*BL|FR=FC+0.30*FR+0.30*BR"'
                     ' -af "aresample=async=1:first_pts=0" -pass 1 -speed 4 -hide_banner "'
-                    + basename + '.webm"')
+                    + basename + '-' + suffix + '.webm"')
         os.system('ffmpeg -i "' + file + '" -b:v 3000k -minrate 1500k -maxrate 4350k -tile-columns 4'
                     ' -g 240 -threads 8 -quality good -crf 30 -c:v libvpx-vp9 -c:a libopus -b:a 96k'
                     ' -ac 2 -af "pan=stereo|FL=FC+0.30*FL+0.30*BL|FR=FC+0.30*FR+0.30*BR"'
                     ' -af "aresample=async=1:first_pts=0" -pass 2 -speed 2 -hide_banner -y "'
-                    + basename + '.webm"')
+                    + basename + '-' + suffix + '.webm"')
         os.unlink('ffmpeg2pass-0.log')
 
         shutil.move(basename + '.webm', path)
 
 
-def ffmpeg(files, width, height, avg, min, max, tile1, tile2, threads, crf, speed):
+def ffmpeg(files, suffix, width, height, avg, min, max, tile1, tile2, threads, crf, speed):
     scan_folder()
+
+    path = os.getcwd() + '/' + suffix
+    if not os.path.exists(path):
+        os.mkdir(path)
 
     for file in files:
         basename = re.sub('\.mkv|mp4|avi|mov|flv|MOV$', '', file)
@@ -52,13 +59,13 @@ def ffmpeg(files, width, height, avg, min, max, tile1, tile2, threads, crf, spee
                     ' -g 240 -threads ' + threads + ' -quality good -crf ' + crf + ' -c:v libvpx-vp9 -c:a libopus'
                     ' -ac 2 -af "pan=stereo|FL=FC+0.30*FL+0.30*BL|FR=FC+0.30*FR+0.30*BR"'
                     ' -af "aresample=async=1:first_pts=0" -pass 1 -speed 4 -hide_banner "'
-                    + basename + '.webm"')
+                    + basename + '-' + suffix + '.webm"')
         os.system('ffmpeg -i "' + file + '" -vf scale=' + width + 'x' + height + ' -b:v ' + avg + 'k'
                     ' -minrate ' + min + 'k -maxrate ' + max + 'k -tile-columns ' + tile2 +
                     ' -g 240 -threads ' + threads + ' -quality good -crf ' + crf + ' -c:v libvpx-vp9 -c:a libopus'
                     ' -ac 2 -af "pan=stereo|FL=FC+0.30*FL+0.30*BL|FR=FC+0.30*FR+0.30*BR" -y'
                     ' -af "aresample=async=1:first_pts=0" -pass 2 -speed ' + speed + ' -hide_banner "'
-                    + basename + '.webm"')
+                    + basename + '-' + suffix + '.webm"')
         os.unlink('ffmpeg2pass-0.log')
 
         shutil.move(basename + '.webm', path)
@@ -95,33 +102,42 @@ def options():
 
     args = parser.parse_args()
     if args is not None:
-        if not os.path.exists(path):
-            os.mkdir(path)
-
         if args.original:
-            ffmpeg_orig(files)
+            suffix = 'original'
+            ffmpeg_orig(files, suffix)
         elif args.enc240p:
-            ffmpeg(files, '320', '240', '150', '75', '218', '0', '1', '2', '37', '1')
+            suffix = 'enc240p'
+            ffmpeg(files, suffix, '320', '240', '150', '75', '218', '0', '1', '2', '37', '1')
         elif args.enc360p:
-            ffmpeg(files, '640', '360', '276', '138', '400', '1', '2', '4', '36', '1')
+            suffix = 'enc360p'
+            ffmpeg(files, suffix, '640', '360', '276', '138', '400', '1', '2', '4', '36', '1')
         elif args.enc480p:
-            ffmpeg(files, '640', '480', '750', '375', '1088', '1', '2', '4', '33', '1')
+            suffix = 'enc480p'
+            ffmpeg(files, suffix, '640', '480', '750', '375', '1088', '1', '2', '4', '33', '1')
         elif args.enc720p30:
-            ffmpeg(files, '1280', '720', '1024', '512', '1485', '2', '4', '8', '32', '2')
+            suffix = 'enc720p30'
+            ffmpeg(files, suffix, '1280', '720', '1024', '512', '1485', '2', '4', '8', '32', '2')
         elif args.enc720p60:
-            ffmpeg(files, '1280', '720', '1800', '900', '2610', '2', '4', '8', '32', '2')
+            suffix = 'enc720p60'
+            ffmpeg(files, suffix, '1280', '720', '1800', '900', '2610', '2', '4', '8', '32', '2')
         elif args.enc1080p30:
-            ffmpeg(files, '1920', '1080', '1800', '900', '2610', '2', '4', '8', '31', '2')
+            suffix = 'enc1080p30'
+            ffmpeg(files, suffix, '1920', '1080', '1800', '900', '2610', '2', '4', '8', '31', '2')
         elif args.enc1080p60:
-            ffmpeg(files, '1920', '1080', '3000', '1500', '4350', '2', '4', '8', '31', '2')
+            suffix = 'enc1080p60'
+            ffmpeg(files, suffix, '1920', '1080', '3000', '1500', '4350', '2', '4', '8', '31', '2')
         elif args.enc1440p30:
-            ffmpeg(files, '2560', '1440', '6000', '3000', '8700', '3', '8', '16', '24', '2')
+            suffix = 'enc1440p30'
+            ffmpeg(files, suffix, '2560', '1440', '6000', '3000', '8700', '3', '8', '16', '24', '2')
         elif args.enc1440p60:
-            ffmpeg(files, '2560', '1440', '9000', '4500', '13050', '3', '8', '16', '24', '2')
+            suffix = 'enc1440p60'
+            ffmpeg(files, suffix, '2560', '1440', '9000', '4500', '13050', '3', '8', '16', '24', '2')
         elif args.enc2160p30:
-            ffmpeg(files, '3840', '2160', '12000', '6000', '17400', '4', '16', '24', '15', '2')
+            suffix = 'enc2160p30'
+            ffmpeg(files, suffix, '3840', '2160', '12000', '6000', '17400', '4', '16', '24', '15', '2')
         elif args.enc2160p60:
-            ffmpeg(files, '3840', '2160', '18000', '9000', '26100', '4', '16', '24', '15', '2')
+            suffix = 'enc2160p60'
+            ffmpeg(files, suffix, '3840', '2160', '18000', '9000', '26100', '4', '16', '24', '15', '2')
     else:
         parser.print_help()
         sys.exit(2)
